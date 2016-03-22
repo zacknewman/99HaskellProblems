@@ -1,0 +1,54 @@
+{- |
+Module      : MyPrelude
+Description : Functions that are used in the NinetyNineProblems module.
+Copyright   : (c) Zack Newman
+License     :
+
+Maintainer  : zacknewman22@gmail.com
+Stability   : stable
+Portability : portable
+
+The MyPrelude module contains the functions that are used in the
+NinetyNineProblems module which in turns answers 
+the Ninety-Nine Haskell Problems.
+-}
+
+module MyPrelude where
+
+-- |The myFoldl function composes a function left-associatively on an
+-- initializer element and a list returning a single value.
+myFoldl           :: (a -> b -> a) -> a -> [b] -> a
+myFoldl _ n []     = n
+myFoldl f n (x:xs) = myFoldl f (f n x) xs
+
+-- |The myFoldl1 function is the same as the "myFoldl" function except
+-- it doesn't require an initializer element but instead uses the first
+-- element of the non-empty list as the initializer.
+myFoldl1         :: (a -> a -> a) -> [a] -> a
+myFoldl1 _ []     = error "List must not be empty."
+myFoldl1 f (x:xs) = myFoldl f x xs
+
+-- |The myFoldr function composes a function right-associatively on an
+-- initializer element and a list returning a single value.
+myFoldr           :: (a -> b -> b) -> b -> [a] -> b
+myFoldr _ n []     = n
+myFoldr f n (x:xs) = f x (myFoldr f n xs)
+
+-- |The (+++) function concatenates two lists of the same type.
+(+++)          :: [a] -> [a] -> [a]
+(+++) xs ys     = myFoldr (:) ys xs
+
+-- |The myInit function returns a list containing all but the last element
+-- of a non-empty list.
+myInit   :: [a] -> [a]
+myInit [] = error "List must not be empty."
+myInit xs = myInitAcc xs []
+    where myInitAcc [x] acc = acc
+          myInitAcc (x:xs) acc = myInitAcc xs (acc +++ [x])
+          
+-- |The myFoldr1 function is the same as the "myFoldr" function except
+-- it doesn't require an initializer element but instead uses the last
+-- element of the non-empty list as the initializer.
+myFoldr1         :: (a -> a -> a) -> [a] -> a
+myFoldr1 f []     = error "List must not be empty."
+myFoldr1 f xs     = myFoldr f (myLast xs) (myInit xs)

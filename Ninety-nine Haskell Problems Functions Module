@@ -1,0 +1,28 @@
+{- |
+Module      : NinetyNineProblems
+Description : Answers to Ninety-Nine Haskell Problems
+Copyright   : (c) Zack Newman
+License     :
+
+Maintainer  : zacknewman22@gmail.com
+Stability   : stable
+Portability : portable
+
+The NinetyNineProblems module contains the answers/functions to
+Ninety-Nine Haskell Problems.
+-}
+
+module NinetyNineProblems where
+import MyPrelude
+
+-- |The myLast function returns the last element of a non-empty list.
+myLast   :: [a] -> a
+myLast [] = error "List must not be empty."
+myLast xs = myFoldl1 (\ _ x -> x) xs
+
+-- |The myButLast function returns the second-to-last element of a list with
+-- at least two elements.
+myButLast   :: [a] -> a
+myButLast []  = error "List must have at least two elements."
+myButLast [x] = error "List must have at least two elements."
+myButLast xs  = myLast $ myInit xs

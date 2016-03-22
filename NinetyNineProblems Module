@@ -9,7 +9,7 @@ Stability   : stable
 Portability : portable
 
 The NinetyNineProblems module contains the answers/functions to
-Ninety-Nine Haskell Problems.
+H-99: Ninety-Nine Haskell Problems.
 -}
 
 module NinetyNineProblems where

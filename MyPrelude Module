@@ -10,7 +10,7 @@ Portability : portable
 
 The MyPrelude module contains the functions that are used in the
 NinetyNineProblems module which in turns answers 
-the Ninety-Nine Haskell Problems.
+the H-99: Ninety-Nine Haskell Problems.
 -}
 
 module MyPrelude where

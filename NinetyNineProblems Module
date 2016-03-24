@@ -26,12 +26,13 @@ myLast xs = myFoldl1 (\ _ x -> x) xs
 -- at least two elements.
 myButLast    :: [a] -> a
 myButLast []  = error "List must have at least two elements."
-myButLast [x] = error "List must have at least two elements."
+myButLast [_] = error "List must have at least two elements."
 myButLast xs  = myLast $ myInit xs
 
 -- |The (!!!) function returns the kth element of a non-empty list.
 infixl 9 !!!
 (!!!)          :: [a] -> Int -> a
+(!!!) [] _      = error "List must be non-empty."
 (!!!) (x:xs) n
     | n >= l    = error "Index must be >= 0 and < the length of the list."
     | n == 0    = x
@@ -59,5 +60,18 @@ flatten (List xs) = myFoldl (\ ys y -> ys +++ flatten y) [] xs
 -- |The compress function eliminates consecutive duplicate elements of a list.
 compress   :: (Eq a) => [a] -> [a]
 compress [] = []
-compress xs = myFoldr (\ x ys -> if myHead ys == x then ys else (:) x ys)
-              [myLast xs] (myInit xs)
+compress xs = myFoldr (\ x ys -> if myHead ys == x then ys else x:ys)
+              [myLast xs] $ myInit xs
+
+-- |The pack function returns a list of sublists whose elements are consecutive
+-- duplicate elements of the inputted list.
+pack   :: (Eq a) => [a] -> [[a]]
+pack [] = []
+pack xs = myFoldr (\ x (ys:yss) -> if myHead ys == x then ((x:ys):yss) else
+          ([x]:(ys:yss))) [[myLast xs]] $ myInit xs
+
+-- |The encode function returns a list of tuples where each tuple contains the
+-- number of times an element repeats itself consecutively in a list as well
+-- as the element itself.
+encode   :: (Eq a) => [a] -> [(Int, a)]
+encode xs = map (\ ys -> (myLength ys, myHead ys)) $ pack xs

@@ -32,7 +32,7 @@ myFoldl1 f (x:xs) = myFoldl f x xs
 -- initializer element and a list returning a single value.
 myFoldr           :: (a -> b -> b) -> b -> [a] -> b
 myFoldr _ n []     = n
-myFoldr f n (x:xs) = f x (myFoldr f n xs)
+myFoldr f n (x:xs) = f x . myFoldr f n $ xs
 
 -- |The (+++) function concatenates two lists of the same type.
 infixr 5 +++
@@ -44,10 +44,11 @@ infixr 5 +++
 myInit   :: [a] -> [a]
 myInit [] = error "List must not be empty."
 myInit xs = myInitAcc xs []
-    where myInitAcc [x] acc = acc
-          myInitAcc (x:xs) acc = myInitAcc xs (acc +++ [x])
+    where myInitAcc [] acc     = acc
+          myInitAcc [_] acc    = acc
+          myInitAcc (y:ys) acc = myInitAcc ys (acc +++ [y])
 
 -- |The myHead function returns the first element of a non-empty list.
 myHead       :: [a] -> a
 myHead []     = error "List must not be empty"
-myHead (x:xs) = x
+myHead (x:_) = x

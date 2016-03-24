@@ -8,9 +8,9 @@ Maintainer  : zacknewman22@gmail.com
 Stability   : stable
 Portability : portable
 
-The MyPrelude module contains the functions that are used in the
-NinetyNineProblems module which in turns answers 
-the H-99: Ninety-Nine Haskell Problems.
+The MyPrelude module contains some of the fundamental functions that are
+used in the NinetyNineProblems module which in turn answers the
+H-99: Ninety-Nine Haskell Problems.
 -}
 
 module MyPrelude where
@@ -35,6 +35,7 @@ myFoldr _ n []     = n
 myFoldr f n (x:xs) = f x (myFoldr f n xs)
 
 -- |The (+++) function concatenates two lists of the same type.
+infixr 5 +++
 (+++)          :: [a] -> [a] -> [a]
 (+++) xs ys     = myFoldr (:) ys xs
 
@@ -45,10 +46,8 @@ myInit [] = error "List must not be empty."
 myInit xs = myInitAcc xs []
     where myInitAcc [x] acc = acc
           myInitAcc (x:xs) acc = myInitAcc xs (acc +++ [x])
-          
--- |The myFoldr1 function is the same as the "myFoldr" function except
--- it doesn't require an initializer element but instead uses the last
--- element of the non-empty list as the initializer.
-myFoldr1         :: (a -> a -> a) -> [a] -> a
-myFoldr1 f []     = error "List must not be empty."
-myFoldr1 f xs     = myFoldr f (myLast xs) (myInit xs)
+
+-- |The myHead function returns the first element of a non-empty list.
+myHead       :: [a] -> a
+myHead []     = error "List must not be empty"
+myHead (x:xs) = x

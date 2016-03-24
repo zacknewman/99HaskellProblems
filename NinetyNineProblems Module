@@ -1,6 +1,6 @@
 {- |
 Module      : NinetyNineProblems
-Description : Answers to Ninety-Nine Haskell Problems
+Description : Answers to H-99: Ninety-Nine Haskell Problems
 Copyright   : (c) Zack Newman
 License     :
 
@@ -15,6 +15,8 @@ H-99: Ninety-Nine Haskell Problems.
 module NinetyNineProblems where
 import MyPrelude
 
+data NestedList a = Elem a | List [NestedList a] deriving (Show)
+
 -- |The myLast function returns the last element of a non-empty list.
 myLast   :: [a] -> a
 myLast [] = error "List must not be empty."
@@ -22,7 +24,40 @@ myLast xs = myFoldl1 (\ _ x -> x) xs
 
 -- |The myButLast function returns the second-to-last element of a list with
 -- at least two elements.
-myButLast   :: [a] -> a
+myButLast    :: [a] -> a
 myButLast []  = error "List must have at least two elements."
 myButLast [x] = error "List must have at least two elements."
 myButLast xs  = myLast $ myInit xs
+
+-- |The (!!!) function returns the kth element of a non-empty list.
+infixl 9 !!!
+(!!!)          :: [a] -> Int -> a
+(!!!) (x:xs) n
+    | n >= l    = error "Index must be >= 0 and < the length of the list."
+    | n == 0    = x
+    | otherwise = (!!!) xs (n - 1)
+        where l = myLength (x:xs)
+
+-- |The myLength function returns the number of elements in a list.
+myLength   :: [a] -> Int
+myLength xs = myFoldl (\ x _ -> x + 1) 0 xs
+
+-- |The myReverse function reverses the order of the elements of a list.
+myReverse   :: [a] -> [a]
+myReverse xs = myFoldl (\ ys y -> y:ys) [] xs
+
+-- |The isPalindrome function tests if a list is a palindrome.
+isPalindrome   :: (Eq a) => [a] -> Bool
+isPalindrome xs = xs == myReverse xs
+
+-- |The flatten function converts NestedLists into a single "flat" list.
+flatten          :: NestedList a -> [a]
+flatten (Elem x)  = [x]
+flatten (List []) = []
+flatten (List xs) = myFoldl (\ ys y -> ys +++ flatten y) [] xs
+
+-- |The compress function eliminates consecutive duplicate elements of a list.
+compress   :: (Eq a) => [a] -> [a]
+compress [] = []
+compress xs = myFoldr (\ x ys -> if myHead ys == x then ys else (:) x ys)
+              [myLast xs] (myInit xs)

@@ -56,7 +56,7 @@ isPalindrome xs = xs == myReverse xs
 flatten          :: NestedList a -> [a]
 flatten (Elem x)  = [x]
 flatten (List []) = []
-flatten (List xs) = myFoldl (\ ys y -> ys +++ flatten y) [] xs
+flatten (List xs) = myConcatMap flatten xs
 
 -- |The compress function eliminates consecutive duplicate elements of a list.
 compress   :: (Eq a) => [a] -> [a]
@@ -87,7 +87,7 @@ encodeModified xs = map f $ pack xs
 
 -- |The decodeModified function converts a list of EncodedTuples to a list
 decodeModified   :: [EncodedTuple a] -> [a]
-decodeModified xs = foldr (+++) [] $ map f xs
+decodeModified xs = myConcatMap f xs
     where f (Single a)        = [a]
           f (Multiple (n, a)) = myTake n $ myRepeat a
 
@@ -104,6 +104,12 @@ encodeDirect xs = myFoldr (\ x ys -> f (Single x) (myHead ys) +++ (tail ys))
           f (Single a) (Multiple (n, b))        = if a == b then [Multiple (n +
                                                   1, a)] else [Single a,
                                                   Multiple (n, b)]
+          f (Multiple (n, a)) (Single b)        = if a == b then [Multiple (n +
+                                                  1, a)] else [Multiple (n, a),
+                                                  Single b]
+          f (Multiple (m, a)) (Multiple (n, b)) = if a == b then [Multiple (m +
+                                                  n, a)] else [Multiple (m, a),
+                                                  Multiple (n, b)]
 
 -- |The dupli function duplicates every element of a list.
 dupli   :: [a] -> [a]
@@ -112,15 +118,15 @@ dupli xs = myFoldr (\ x ys -> (x:x:ys)) [] xs
 -- |The repli function replicates each element of a list the inputted number
 -- of times.
 repli     :: [a] -> Int -> [a]
-repli xs n = myFoldr (\ x ys -> myTake n (myRepeat x) +++ ys) [] xs
+repli xs n = myConcatMap (myTake n . myRepeat) xs
 
 -- |The dropEvery function drops every kth element of a list.
 dropEvery     :: [a] -> Int -> [a]
 dropEvery xs 0 = xs
 dropEvery xs n = dropEvery' xs [] n
-    where dropEvery' [] acc n = acc
-          dropEvery' ys acc n = dropEvery' (myDrop n ys) (acc +++ myTake (n - 1)
-                                ys) n
+    where dropEvery' [] acc _ = acc
+          dropEvery' ys acc m = dropEvery' (myDrop m ys) (acc +++ myTake (m - 1)
+                                ys) m
 
 -- |The split function spits a list into two tuples where the first tuple has
 -- length of the inputted integer.
@@ -149,3 +155,20 @@ removeAt n xs
     | n <= 0          = error "Index must be > 0 and <= the length of the list."
     | myLength xs < n = error "Index must be > 0 and <= the length of the list."
     | otherwise       = (xs !!! (n - 1), myTake (n - 1) xs +++ myDrop n xs)
+
+-- |The insertAt function inserts an element at the inputted index in a list
+-- (indexed from 1). If the inputted index is larger than the length of the
+-- list, the element will be placed at the end of the list.
+insertAt       :: a -> [a] -> Int -> [a]
+insertAt x xs n
+    | n <= 0    = error "Index must be > 0."
+    | otherwise = myTake (n - 1) xs +++ [x] +++ myDrop (n - 1) xs
+
+-- |The range function creates a list of all integers within (and
+-- including) the two inputted integers. To make it interesting,
+-- I avoided [m..n] as an implementation.
+range          :: Int -> Int -> [Int]
+range m n
+    | m > n     = []
+    | m == n    = [m]
+    | otherwise = m:range (m + 1) n

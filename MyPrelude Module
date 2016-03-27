@@ -43,12 +43,35 @@ infixr 5 +++
 -- of a non-empty list.
 myInit   :: [a] -> [a]
 myInit [] = error "List must not be empty."
-myInit xs = myInitAcc xs []
-    where myInitAcc [] acc     = acc
-          myInitAcc [_] acc    = acc
-          myInitAcc (y:ys) acc = myInitAcc ys (acc +++ [y])
+myInit xs = myInit' xs []
+    where myInit' [] acc     = acc
+          myInit' [_] acc    = acc
+          myInit' (y:ys) acc = myInit' ys (acc +++ [y])
 
 -- |The myHead function returns the first element of a non-empty list.
-myHead       :: [a] -> a
-myHead []     = error "List must not be empty"
+myHead      :: [a] -> a
+myHead []    = error "List must not be empty"
 myHead (x:_) = x
+
+-- |The myTake function returns the first inputted number of elements
+-- from the inputted list. If the inputted number exceeds the total number
+-- of elements of the list, then the original list is returned.
+myTake     :: Int -> [a] -> [a]
+myTake 0 xs = []
+myTake n xs = myFoldr (\ y ys-> y:myTake (n - 1) ys) [] xs
+
+-- |The myRepeat function returns the infinite list of the inputted argument.
+myRepeat  :: a -> [a]
+myRepeat x = x:myRepeat x
+
+-- |The myDrop function drops the first inputted number of elements
+-- from a list.
+myDrop         :: Int -> [a] -> [a]
+myDrop _ []     = []
+myDrop 0 xs     = xs
+myDrop n (x:xs) = myDrop (n - 1) xs
+
+-- |The myTail function returns all but the first element of a list.
+myTail       :: [a] -> [a]
+myTail []     = error "List must not be empty."
+myTail (x:xs) = xs

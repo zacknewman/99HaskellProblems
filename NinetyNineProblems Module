@@ -16,6 +16,7 @@ module NinetyNineProblems where
 import MyPrelude
 
 data NestedList a = Elem a | List [NestedList a] deriving (Show)
+data EncodedTuple a = Single a | Multiple (Int, a) deriving (Show)
 
 -- |The myLast function returns the last element of a non-empty list.
 myLast   :: [a] -> a
@@ -75,3 +76,76 @@ pack xs = myFoldr (\ x (ys:yss) -> if myHead ys == x then ((x:ys):yss) else
 -- as the element itself.
 encode   :: (Eq a) => [a] -> [(Int, a)]
 encode xs = map (\ ys -> (myLength ys, myHead ys)) $ pack xs
+
+-- |The encodeModified function is the same as the "encode" function except 
+-- elements of the returned list are EncodedTuples where elements that don't
+-- repetitively are returned without the number 1.
+encodeModified   :: (Eq a) => [a] -> [EncodedTuple a]
+encodeModified xs = map f $ pack xs
+    where (l, h, f) = (myLength, myHead, \ ys -> if l ys == 1 then Single $ h ys
+                       else Multiple (l ys, h ys))
+
+-- |The decodeModified function converts a list of EncodedTuples to a list
+decodeModified   :: [EncodedTuple a] -> [a]
+decodeModified xs = foldr (+++) [] $ map f xs
+    where f (Single a)        = [a]
+          f (Multiple (n, a)) = myTake n $ myRepeat a
+
+-- |The encodeDirect function is potentially a "direct" implementation of the
+-- encodeModified function, i.e., it doesn't actually manually create
+-- the sublists first via the "pack" function. I say "potentially" because
+-- I'm not certain what Problem 13 is getting at specifically.
+encodeDirect   :: (Eq a) => [a] -> [EncodedTuple a]
+encodeDirect [] = []
+encodeDirect xs = myFoldr (\ x ys -> f (Single x) (myHead ys) +++ (tail ys))
+                  [Single (myLast xs)] (myInit xs)
+    where f (Single a) (Single b)               = if a == b then [Multiple (2, 
+                                                  a)] else [Single a, Single b]
+          f (Single a) (Multiple (n, b))        = if a == b then [Multiple (n +
+                                                  1, a)] else [Single a,
+                                                  Multiple (n, b)]
+
+-- |The dupli function duplicates every element of a list.
+dupli   :: [a] -> [a]
+dupli xs = myFoldr (\ x ys -> (x:x:ys)) [] xs
+
+-- |The repli function replicates each element of a list the inputted number
+-- of times.
+repli     :: [a] -> Int -> [a]
+repli xs n = myFoldr (\ x ys -> myTake n (myRepeat x) +++ ys) [] xs
+
+-- |The dropEvery function drops every kth element of a list.
+dropEvery     :: [a] -> Int -> [a]
+dropEvery xs 0 = xs
+dropEvery xs n = dropEvery' xs [] n
+    where dropEvery' [] acc n = acc
+          dropEvery' ys acc n = dropEvery' (myDrop n ys) (acc +++ myTake (n - 1)
+                                ys) n
+
+-- |The split function spits a list into two tuples where the first tuple has
+-- length of the inputted integer.
+split     :: [a] -> Int -> ([a], [a])
+split xs n = (myTake n xs, myDrop n xs)
+
+-- |The slice function returns the list of elements between (and including)
+-- the two inputted indices (indexed from 1).
+slice        :: [a] -> Int -> Int -> [a]
+slice xs m n = myTake (n - m + 1) $ myDrop (m - 1) xs
+
+-- |The rotate function rotates a list the inputted integer number of
+-- places to the left.
+rotate         :: [a] -> Int -> [a]
+rotate [] _     = []
+rotate xs n
+    | n < 0     = myReverse (myTake j $ myReverse xs)  +++ myTake (l - j) xs
+    | otherwise = myDrop k xs +++ myTake k xs
+        where (l, j, k) = (myLength xs, (-n) `mod` l, n `mod` l)
+
+-- |The removeAt function removes the element with the inputted index from the
+-- list (indexed from 1) and returns a tuple containing the element and the
+-- resulting list.
+removeAt             :: Int -> [a] -> (a, [a])
+removeAt n xs
+    | n <= 0          = error "Index must be > 0 and <= the length of the list."
+    | myLength xs < n = error "Index must be > 0 and <= the length of the list."
+    | otherwise       = (xs !!! (n - 1), myTake (n - 1) xs +++ myDrop n xs)

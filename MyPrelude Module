@@ -57,7 +57,7 @@ myHead (x:_) = x
 -- from the inputted list. If the inputted number exceeds the total number
 -- of elements of the list, then the original list is returned.
 myTake     :: Int -> [a] -> [a]
-myTake 0 xs = []
+myTake 0 _ = []
 myTake n xs = myFoldr (\ y ys-> y:myTake (n - 1) ys) [] xs
 
 -- |The myRepeat function returns the infinite list of the inputted argument.
@@ -69,9 +69,14 @@ myRepeat x = x:myRepeat x
 myDrop         :: Int -> [a] -> [a]
 myDrop _ []     = []
 myDrop 0 xs     = xs
-myDrop n (x:xs) = myDrop (n - 1) xs
+myDrop n (_:xs) = myDrop (n - 1) xs
 
 -- |The myTail function returns all but the first element of a list.
 myTail       :: [a] -> [a]
 myTail []     = error "List must not be empty."
-myTail (x:xs) = xs
+myTail (_:xs) = xs
+
+-- |The myConcatMap function maps a function over all the elements of a list
+-- and concatenates the resulting lists.
+myConcatMap     :: (a -> [b]) -> [a] -> [b]
+myConcatMap f xs = myFoldl (\ ys x -> ys +++ f x) [] xs
